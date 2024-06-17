@@ -19,7 +19,7 @@ public class OrderController {
 
     @PostMapping("/api/order")
     @ResponseStatus(HttpStatus.CREATED)
-    public String laceOrder(@RequestBody OrderRequest orderRequest) {
+    public String placeOrder(@RequestBody OrderRequest orderRequest) {
         orderService.placeOrder(orderRequest);
         return "Order created";
     }

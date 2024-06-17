@@ -21,6 +21,10 @@ public class OrderService {
     private final OrderRepository orderRepository;
 
     public void placeOrder(OrderRequest orderRequest) {
+        if (orderRequest.getOrderLineItemsList() == null) {
+            throw new IllegalArgumentException("Order line items list cannot be null");
+        }
+
         Order order = new Order();
         order.setOrderNumber(UUID.randomUUID().toString());
 
