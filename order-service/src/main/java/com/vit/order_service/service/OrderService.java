@@ -4,8 +4,10 @@ import java.util.UUID;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import com.vit.order_service.dto.OrderLineItemsDto;
 import com.vit.order_service.dto.OrderRequest;
@@ -21,10 +23,11 @@ import lombok.RequiredArgsConstructor;
 public class OrderService {
 
     private final OrderRepository orderRepository;
+    private final WebClient webClient;
 
     public void placeOrder(OrderRequest orderRequest) {
-        if (orderRequest.getOrderLineItemsList() == null) {
-            throw new IllegalArgumentException("Order line items list cannot be null");
+        if (orderRequest.getOrderLineItemsList() == null || orderRequest.getOrderLineItemsList().isEmpty()) {
+            throw new IllegalArgumentException("Order line items list cannot be null or empty");
         }
 
         Order order = new Order();
@@ -36,7 +39,27 @@ public class OrderService {
                 .collect(Collectors.toList());
 
         order.setOrderLineItemsList(orderLineItemsList);
-        orderRepository.save(order);
+
+        List<String> skuCodes = orderLineItemsList.stream()
+                .map(OrderLineItems::getSkuCode)
+                .collect(Collectors.toList());
+
+        // Example of WebClient usage, adjust as per your actual endpoint and response
+        // handling
+        Boolean result = webClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("http://localhost:8082/api/inventory/")
+                        .queryParam("skuCodes", skuCodes)
+                        .build())
+                .retrieve()
+                .bodyToMono(Boolean.class)
+                .block();
+
+        if (result == null || !result) {
+            throw new IllegalArgumentException("Product is not available in inventory");
+        } else {
+            orderRepository.save(order);
+        }
     }
 
     private OrderLineItems mapToEntity(OrderLineItemsDto orderLineItemsDto) {
