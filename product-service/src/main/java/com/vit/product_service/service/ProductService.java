@@ -2,6 +2,7 @@ package com.vit.product_service.service;
 
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,16 +32,21 @@ public class ProductService {
                 .price(productRequest.getPrice())
                 .build();
 
-        productRepository.save(product);
+        productRepository.save(product); 
         log.info("Product {} is saved", product.getId());
     }
-
-    public List<ProductResponse> getAllProducts() {
+public List<ProductResponse> getAllProducts() {
+    try {
         List<Product> products = productRepository.findAll();
         return products.stream()
                 .map(this::mapToProductResponse)
                 .toList();
+    } catch (Exception e) {
+        log.error("Error while fetching products. Error error hai: {}", e.getMessage());
+        // You can also return an empty list or handle the error in another way
+        return Collections.emptyList();
     }
+}
 
     private ProductResponse mapToProductResponse(Product product) {
         return ProductResponse.builder()

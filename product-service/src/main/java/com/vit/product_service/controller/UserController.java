@@ -1,7 +1,5 @@
 package com.vit.product_service.controller;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -11,33 +9,38 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.vit.product_service.dto.CreateUserRequest;
-import com.vit.product_service.dto.ProductRequest;
-import com.vit.product_service.dto.ProductResponse;
-import com.vit.product_service.service.ProductService;
+import com.vit.product_service.model.User;
+import com.vit.product_service.service.UserService;
+
 import org.springframework.http.HttpStatus;
+import java.util.*;
 
 @RestController
-@RequestMapping("/api/product")
-public class ProductController {
+@RequestMapping("/api/user")
+public class UserController {
 
-    private final ProductService productService;
+    private final UserService userService;
 
     @Autowired
-    public ProductController(ProductService productService) {
-        this.productService = productService;
+    public UserController(UserService userService) {
+        this.userService = userService;
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public String createProduct(@RequestBody ProductRequest productRequest) {
-        productService.createProduct(productRequest);
-        return "201 created";
-    }
-
-    @GetMapping
-    @ResponseStatus(HttpStatus.OK)
-    public List<ProductResponse> getAllProduct() {
-        return productService.getAllProducts();
+    public void createUser(@RequestBody CreateUserRequest createUserRequest) {
+        userService.createUser(createUserRequest);
     }
     
+    @GetMapping
+    @ResponseStatus(HttpStatus.OK)
+    public List<User> getAllUser() {
+        return userService.getAllUsers();
+    }
+
+    @GetMapping("/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    public User getUserById(@RequestBody User user) {
+        return userService.updateUser(user);
+    }
 }
